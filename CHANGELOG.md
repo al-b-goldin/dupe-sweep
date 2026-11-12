@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0 (unreleased)
+## 1.0 (2026-11-12)
 - Scan engine: size grouping, partial fingerprint, full SHA-256, APFS clone and hard link awareness.
 - Keep rules: Smart, larger folder, most recent folder, oldest folder, newest file, oldest file, top of list. Pinned folders.
 - Safe Trash mover with a recheck before each move and "Put Everything Back".
