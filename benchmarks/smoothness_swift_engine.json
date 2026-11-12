@@ -1,0 +1,150 @@
+{
+ "probe": [
+  {
+   "mode": "idle",
+   "tool_gb_s": 0.0,
+   "io_p50": 0.59,
+   "io_p99": 4.64,
+   "io_max": 7.5,
+   "jit_p99": 4.54,
+   "jit_max": 11.5,
+   "round": 0
+  },
+  {
+   "mode": "default",
+   "tool_gb_s": 1.98,
+   "io_p50": 0.25,
+   "io_p99": 3.9,
+   "io_max": 4.5,
+   "jit_p99": 2.55,
+   "jit_max": 36.6,
+   "round": 0
+  },
+  {
+   "mode": "fast",
+   "tool_gb_s": 4.12,
+   "io_p50": 0.62,
+   "io_p99": 8.52,
+   "io_max": 10.7,
+   "jit_p99": 2.58,
+   "jit_max": 5.5,
+   "round": 0
+  },
+  {
+   "mode": "default",
+   "tool_gb_s": 2.13,
+   "io_p50": 0.25,
+   "io_p99": 3.41,
+   "io_max": 4.0,
+   "jit_p99": 2.55,
+   "jit_max": 2.7,
+   "round": 1
+  },
+  {
+   "mode": "fast",
+   "tool_gb_s": 4.13,
+   "io_p50": 0.57,
+   "io_p99": 7.83,
+   "io_max": 10.0,
+   "jit_p99": 2.71,
+   "jit_max": 9.5,
+   "round": 1
+  },
+  {
+   "mode": "idle",
+   "tool_gb_s": 0.0,
+   "io_p50": 0.65,
+   "io_p99": 5.13,
+   "io_max": 6.8,
+   "jit_p99": 4.02,
+   "jit_max": 9.1,
+   "round": 1
+  },
+  {
+   "mode": "fast",
+   "tool_gb_s": 4.13,
+   "io_p50": 0.66,
+   "io_p99": 7.94,
+   "io_max": 9.7,
+   "jit_p99": 2.6,
+   "jit_max": 8.2,
+   "round": 2
+  },
+  {
+   "mode": "idle",
+   "tool_gb_s": 0.0,
+   "io_p50": 0.65,
+   "io_p99": 5.96,
+   "io_max": 6.9,
+   "jit_p99": 4.31,
+   "jit_max": 18.6,
+   "round": 2
+  },
+  {
+   "mode": "default",
+   "tool_gb_s": 2.1,
+   "io_p50": 0.24,
+   "io_p99": 3.09,
+   "io_max": 4.0,
+   "jit_p99": 2.55,
+   "jit_max": 3.3,
+   "round": 2
+  }
+ ],
+ "job": [
+  {
+   "write_3gb_s": 1.15,
+   "small_reads_1500_s": 0.39,
+   "mode": "idle",
+   "round": 0
+  },
+  {
+   "write_3gb_s": 1.09,
+   "small_reads_1500_s": 0.47,
+   "mode": "default",
+   "round": 0
+  },
+  {
+   "write_3gb_s": 1.06,
+   "small_reads_1500_s": 0.45,
+   "mode": "fast",
+   "round": 0
+  },
+  {
+   "write_3gb_s": 1.02,
+   "small_reads_1500_s": 0.39,
+   "mode": "default",
+   "round": 1
+  },
+  {
+   "write_3gb_s": 1.09,
+   "small_reads_1500_s": 0.42,
+   "mode": "fast",
+   "round": 1
+  },
+  {
+   "write_3gb_s": 3.2,
+   "small_reads_1500_s": 0.37,
+   "mode": "idle",
+   "round": 1
+  },
+  {
+   "write_3gb_s": 1.07,
+   "small_reads_1500_s": 0.45,
+   "mode": "fast",
+   "round": 2
+  },
+  {
+   "write_3gb_s": 1.05,
+   "small_reads_1500_s": 0.42,
+   "mode": "idle",
+   "round": 2
+  },
+  {
+   "write_3gb_s": 1.05,
+   "small_reads_1500_s": 0.49,
+   "mode": "default",
+   "round": 2
+  }
+ ]
+}
