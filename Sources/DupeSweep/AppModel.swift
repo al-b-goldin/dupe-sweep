@@ -29,6 +29,7 @@ final class AppModel {
     var report: TrashReport?
     var trashProgress: (done: Int, total: Int)?
     var restored: Int?
+    var restoreFailed = 0
     var message: String?
     var expanded: Set<String> = []
     private var scanner: DuplicateScanner?
@@ -72,7 +73,6 @@ final class AppModel {
                 let r = try await s.scan(roots: roots, options: o) { p in Task { @MainActor in self?.progress = p } }
                 self?.result = r
                 self?.replan()
-                if !r.refusedFolders.isEmpty { self?.message = "Skipped protected folders: " + r.refusedFolders.joined(separator: ", ") }
                 self?.stage = .results
             } catch is CancellationError {
                 self?.stage = .start
@@ -99,6 +99,27 @@ final class AppModel {
     var freedBytes: Int64 { plans.reduce(0) { $0 + ($1.skipped ? 0 : $1.freed) } }
     var activeSets: Int { plans.filter { !$0.removed.isEmpty }.count }
 
+    // MARK: what the screens say
+
+    /// The scan read no file at all. The results screen then says so, in place of "No duplicates found".
+    var nothingChecked: Bool { result.map { $0.filesScanned == 0 } ?? false }
+
+    /// What the scan left out, in plain words. The results screen shows every line.
+    var scanNotes: [String] {
+        guard let r = result else { return [] }
+        var notes: [String] = []
+        if !r.refusedFolders.isEmpty {
+            notes.append("Not checked: " + r.refusedFolders.map(Display.short).joined(separator: ", ") + ". macOS and your apps keep their own files there, so Dupe Sweep leaves those folders alone.")
+        }
+        if r.unreadable > 0 {
+            notes.append("\(Display.count(r.unreadable)) \(r.unreadable == 1 ? "item" : "items") could not be read. To let Dupe Sweep read a folder, open System Settings > Privacy & Security > Files and Folders, then scan again.")
+        }
+        return notes
+    }
+
+    /// The Trash step finished and no file moved (every extra copy changed after the scan).
+    var nothingMoved: Bool { report.map { $0.moved.isEmpty } ?? false }
+
     // MARK: moving to the Trash
 
     func moveToTrash() {
@@ -114,11 +135,13 @@ final class AppModel {
         guard let moved = report?.moved else { return }
         Task.detached { [model = self] in
             let u = Trasher.undo(moved)
-            await MainActor.run { model.restored = u.restored }
+            await MainActor.run { model.restored = u.restored; model.restoreFailed = u.failed.count }
         }
     }
 
-    func startOver() { cancelScan(); stage = .start; result = nil; plans = []; report = nil; restored = nil; overrides = [:]; skipped = []; message = nil }
+    func startOver() { cancelScan(); stage = .start; result = nil; plans = []; report = nil; restored = nil; restoreFailed = 0; overrides = [:]; skipped = []; message = nil }
+
+    func scanAgain() { startOver(); startScan() }
 
     func reveal(_ f: FileItem) { NSWorkspace.shared.activateFileViewerSelecting([f.url]) }
     func openTrash() { NSWorkspace.shared.open(URL(fileURLWithPath: NSHomeDirectory() + "/.Trash")) }

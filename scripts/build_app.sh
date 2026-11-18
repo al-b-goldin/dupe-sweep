@@ -9,9 +9,18 @@ NAME="Dupe Sweep"; EXE="DupeSweep"; VERSION="${VERSION:-1.0}"; BUILD="${BUILD:-1
 DIST="dist"; APP="$DIST/$NAME.app"; DMG="$DIST/$EXE-$VERSION.dmg"
 
 echo "== building (arm64 + x86_64)"
-swift build -c release --arch arm64 --arch x86_64 --product "$EXE" 2>&1 | grep -E "error|Compiling|Build" | tail -3
-BIN=".build/apple/Products/Release/$EXE"
-[ -f "$BIN" ] || BIN=".build/release/$EXE"
+if [ -d "$(xcode-select -p 2>/dev/null)/../SharedFrameworks" ] || [[ "$(xcode-select -p 2>/dev/null)" == *Xcode* ]]; then
+  swift build -c release --arch arm64 --arch x86_64 --product "$EXE" 2>&1 | grep -E "error|Compiling|Build" | tail -3
+  BIN=".build/apple/Products/Release/$EXE"
+else
+  # Without Xcode the package manager cannot build two architectures in one run. Build each one, then join them.
+  for ARCH in arm64 x86_64; do
+    swift build -c release --arch "$ARCH" --product "$EXE" 2>&1 | grep -E "error|Build" | tail -3
+  done
+  BIN=".build/universal-$EXE"
+  lipo -create ".build/arm64-apple-macosx/release/$EXE" ".build/x86_64-apple-macosx/release/$EXE" -output "$BIN"
+fi
+[ -f "$BIN" ] || { echo "error: the build left no program at $BIN"; exit 1; }
 
 echo "== icon"
 mkdir -p "$DIST/icon"

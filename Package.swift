@@ -13,5 +13,6 @@ let package = Package(
         .executableTarget(name: "DupeSweep", dependencies: ["DupeEngine"]),
         .executableTarget(name: "dupecheck", dependencies: ["DupeEngine"]),
         .testTarget(name: "DupeEngineTests", dependencies: ["DupeEngine"]),
+        .testTarget(name: "DupeSweepTests", dependencies: ["DupeSweep", "DupeEngine"]),
     ]
 )

@@ -41,8 +41,20 @@ enum Screenshots {
         try? FileManager.default.createDirectory(atPath: dir, withIntermediateDirectories: true)
         try? await Task.sleep(nanoseconds: 1_500_000_000)
         NSApp.activate(ignoringOtherApps: true)
-        guard let win = NSApp.windows.first(where: { $0.contentView != nil }) else { print("no window"); exit(1) }
-        win.setContentSize(NSSize(width: 880, height: 700))
+        // Without a window on screen (a Mac nobody is logged in at, a background session) the screens render in a window of their own.
+        let win = NSApp.windows.first(where: { $0.contentView != nil }) ?? {
+            let w = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 880, height: 700), styleMask: [.titled], backing: .buffered, defer: false)
+            w.contentView = NSHostingView(rootView: ContentView(model: m))
+            return w
+        }()
+        // `--size 1440x900` renders at another window size (the layout review uses the smallest and a large one).
+        var size = NSSize(width: 880, height: 700)
+        if let i = CommandLine.arguments.firstIndex(of: "--size"), i + 1 < CommandLine.arguments.count {
+            let wh = CommandLine.arguments[i + 1].split(separator: "x").compactMap { Double($0) }
+            if wh.count == 2 { size = NSSize(width: wh[0], height: wh[1]) }
+        }
+        let review = CommandLine.arguments.contains("--all-states")      // also the screens for the less common outcomes
+        win.setContentSize(size)
         for dark in [false, true] {
             NSApp.appearance = NSAppearance(named: dark ? .darkAqua : .aqua)
             func shot(_ name: String) async { try? await Task.sleep(nanoseconds: 900_000_000); snapshot(win, name: name, dir: dir, dark: dark) }
@@ -65,6 +77,27 @@ enum Screenshots {
             var rep = TrashReport(); rep.moved = (0..<14).map { TrashRecord(original: "/x/\($0)", trashed: nil, size: 560_000_000) }
             m.report = rep; m.stage = .done
             await shot("4-done")
+
+            if review {
+                m.restored = 13; m.restoreFailed = 1
+                await shot("5-put-back-one-left")
+                m.restored = nil; m.restoreFailed = 0
+                var none = TrashReport(); none.skipped = [("/x/1", "changed since the scan"), ("/x/2", "changed since the scan")]
+                m.report = none
+                await shot("6-nothing-moved")
+                m.report = nil
+                m.result = ScanResult(sets: [], filesScanned: 0, bytesScanned: 0, refusedFolders: ["/System", NSHomeDirectory() + "/Library"]); m.replan(); m.stage = .results
+                await shot("7-nothing-checked")
+                m.result = ScanResult(sets: [], filesScanned: 0, bytesScanned: 0); m.replan()
+                await shot("8-nothing-big-enough")
+                m.result = ScanResult(sets: [], filesScanned: 41_873, bytesScanned: 612_400_000_000); m.replan()
+                await shot("9-no-duplicates")
+                var noted = sample(); noted.refusedFolders = ["/Applications"]; noted.unreadable = 2
+                m.result = noted; m.replan(); m.expanded = []
+                await shot("10-results-with-notes")
+                m.folders = []; m.result = nil; m.stage = .start
+                await shot("11-start-empty")
+            }
         }
         exit(0)
     }

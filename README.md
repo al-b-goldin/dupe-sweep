@@ -147,10 +147,10 @@ The comparison app is a paid duplicate finder from the Mac App Store, run under 
 <summary><b>Build from source</b></summary>
 <br>
 
-Needs Xcode (Swift 5.9 or later).
+Needs Xcode 16 or later, or the Command Line Tools with Swift 6.
 
 ```bash
-swift test                       # 17 engine tests
+./scripts/test.sh                # 17 engine tests and 9 app workflow tests (with Xcode: plain `swift test`)
 swift build -c release && .build/release/DupeSweep --selftest
 ./scripts/build_app.sh           # writes dist/Dupe Sweep.app and dist/DupeSweep-1.0.dmg
 ```
@@ -164,7 +164,7 @@ The build script signs ad hoc. To sign and notarize with your own Apple Develope
 <br>
 
 - `Sources/DupeEngine`: the scan, the keep rules, the Trash mover. No interface code. Tests are in `Tests/`.
-- `Sources/DupeSweep`: the SwiftUI app. `--selftest` runs the whole flow on scratch files.
+- `Sources/DupeSweep`: the SwiftUI app. `--selftest` runs the whole flow on scratch files. `Tests/DupeSweepTests` walks each workflow of the app (scan, review, move to the Trash, put back) on scratch files with a stand-in Trash.
 - `Sources/dupecheck`: a command line tool that scans a list of paths and prints counts and timing.
 - `scripts/`: the app build, icon and README art scripts.
 - `benchmarks/`: the responsiveness test and its results.

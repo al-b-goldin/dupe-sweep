@@ -43,7 +43,22 @@ enum SelfTest {
         check(!fm.fileExists(atPath: root.appendingPathComponent("Downloads/trip copy.mov").path), "the extra copy is gone from its folder")
         m.undo()
         for _ in 0..<100 where m.restored == nil { try? await Task.sleep(nanoseconds: 100_000_000) }
-        check(m.restored == 3 && fm.fileExists(atPath: root.appendingPathComponent("Downloads/trip copy.mov").path), "Put Everything Back restores all 3")
+        check(m.restored == 3 && m.restoreFailed == 0 && fm.fileExists(atPath: root.appendingPathComponent("Downloads/trip copy.mov").path), "Put Everything Back restores all 3")
+
+        // A folder that is off limits is named on the results screen, and the other folder is still scanned.
+        m.startOver()
+        check(m.stage == .start && m.folders == [root], "Done returns to the start screen with the folder still listed")
+        m.add([URL(fileURLWithPath: "/System")])
+        m.startScan()
+        for _ in 0..<600 where m.stage == .scanning { try? await Task.sleep(nanoseconds: 100_000_000) }
+        check(m.stage == .results && m.plans.count == 2, "a second scan finds the same 2 sets")
+        check(m.scanNotes.contains { $0.contains("/System") }, "the results screen names the protected folder that was not checked")
+
+        // A copy that changed after the scan stays where it is, and the done screen says that nothing moved.
+        for p in m.plans { for r in p.removed { try? Data("edited after the scan".utf8).write(to: r.url) } }
+        m.moveToTrash()
+        for _ in 0..<300 where m.stage != .done { try? await Task.sleep(nanoseconds: 100_000_000) }
+        check(m.stage == .done && m.nothingMoved && m.report?.skipped.count == 3, "edited copies are left alone and the done screen says no files were moved")
         try? fm.removeItem(at: root)
         print(failures.isEmpty ? "ALL PASSED" : "FAILED: \(failures.count)")
         exit(failures.isEmpty ? 0 : 1)

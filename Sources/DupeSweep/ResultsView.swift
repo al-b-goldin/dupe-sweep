@@ -22,11 +22,20 @@ struct ResultsView: View {
     var empty: some View {
         VStack(spacing: 14) {
             Spacer()
-            Image(systemName: "checkmark.seal.fill").font(.system(size: 54)).foregroundStyle(Color.keepGreen)
-            Text("No duplicates found").font(.system(size: 26, weight: .semibold, design: .rounded))
-            Text("Checked \(Display.count(r.filesScanned)) files (\(Format.bytes(r.bytesScanned))) and none of them were copies of each other.").foregroundStyle(.secondary)
+            if model.nothingChecked {
+                Image(systemName: "exclamationmark.triangle.fill").font(.system(size: 54)).foregroundStyle(.orange)
+                Text("Nothing was checked").font(.system(size: 26, weight: .semibold, design: .rounded))
+                if model.scanNotes.isEmpty {
+                    Text("The folders you chose hold no files of \(model.floor.title == "Any size" ? "any size" : model.floor.title + " or more"). Choose other folders, or lower the size under Options.").foregroundStyle(.secondary)
+                }
+            } else {
+                Image(systemName: "checkmark.seal.fill").font(.system(size: 54)).foregroundStyle(Color.keepGreen)
+                Text("No duplicates found").font(.system(size: 26, weight: .semibold, design: .rounded))
+                Text("Checked \(Display.count(r.filesScanned)) files (\(Format.bytes(r.bytesScanned))) and none of them were copies of each other.").foregroundStyle(.secondary)
+            }
             if r.iCloudOnlySkipped > 0 { Text("\(r.iCloudOnlySkipped) files that live only in iCloud were not compared.").font(.callout).foregroundStyle(.secondary) }
-            Button("Check Something Else") { model.startOver() }.controlSize(.large)
+            ScanNotes(notes: model.scanNotes)
+            Button(model.nothingChecked ? "Choose Other Folders" : "Check Something Else") { model.startOver() }.controlSize(.large)
             Spacer()
             CoffeeFooter().padding(.horizontal, 28).padding(.bottom, 16)
         }
@@ -56,6 +65,7 @@ struct ResultsView: View {
                     Text(model.rule.explanation).font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }
                 pinnedRow
+                ScanNotes(notes: model.scanNotes)
                 if model.freedBytes < model.removeBytes {
                     Label("Some copies share disk space with their originals, so removing them returns less than their size.", systemImage: "info.circle")
                         .font(.callout).foregroundStyle(.secondary)
@@ -88,7 +98,7 @@ struct ResultsView: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("\(Display.count(model.removeCount)) files · \(Format.bytes(model.removeBytes)) will move to the Trash").font(.headline)
-                Text("Click a copy in the list to keep that one instead.").font(.caption).foregroundStyle(.secondary)
+                Text("To keep a different copy, open a set in the list and click “Keep this one”.").font(.caption).foregroundStyle(.secondary)
             }
             Spacer()
             if !model.overrides.isEmpty || !model.skipped.isEmpty { Button("Reset My Choices") { model.resetChoices() } }
@@ -97,6 +107,19 @@ struct ResultsView: View {
         }
         .padding(.horizontal, 28).padding(.vertical, 14)
         .background(.bar)
+    }
+}
+
+/// What the scan left out (protected folders, folders it could not read).
+struct ScanNotes: View {
+    let notes: [String]
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            ForEach(notes, id: \.self) { n in
+                Label(n, systemImage: "exclamationmark.triangle").font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .frame(maxWidth: 620, alignment: .leading)
     }
 }
 

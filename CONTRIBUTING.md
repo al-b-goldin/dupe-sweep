@@ -7,8 +7,8 @@ Open an issue with the template. Include your macOS version, the Dupe Sweep vers
 
 ## Send a change
 1. Fork the repo and make a branch.
-2. Run `swift test`. All tests must pass.
-3. Add a test in `Tests/DupeEngineTests` for any change to the engine.
+2. Run `./scripts/test.sh` (with Xcode, plain `swift test` does the same). All tests must pass.
+3. Add a test in `Tests/DupeEngineTests` for any change to the engine, and in `Tests/DupeSweepTests` for any change to what a screen says or does next.
 4. Run `swift build -c release && .build/release/DupeSweep --selftest`.
 5. Open a pull request. Say what changed and why.
 
