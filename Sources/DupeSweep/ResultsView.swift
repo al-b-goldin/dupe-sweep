@@ -152,8 +152,8 @@ struct SetRow: View {
                     Image(systemName: open ? "chevron.down" : "chevron.right").font(.caption.weight(.bold)).foregroundStyle(.secondary).frame(width: 12)
                     Image(nsImage: Display.icon(plan.set.copies[0].path))
                     VStack(alignment: .leading, spacing: 1) {
-                        Text(plan.set.copies[0].name).font(.body.weight(.medium)).lineLimit(1).truncationMode(.middle)
-                        Text("\(plan.set.copies.count) copies · \(Format.bytes(plan.set.size)) each").font(.caption).foregroundStyle(.secondary)
+                        Text(Display.setTitle(plan.set)).font(.body.weight(.medium)).lineLimit(1).truncationMode(.middle)
+                        Text(Display.setDetail(plan.set)).font(.caption).foregroundStyle(.secondary)
                     }
                     Spacer()
                     if plan.skipped { Badge(text: "LEAVING ALONE", color: .secondary) }
@@ -186,7 +186,8 @@ struct CopyRow: View {
         HStack(spacing: 10) {
             Badge(text: plan.skipped ? "STAYS" : keeping ? "KEEP" : "TRASH", color: keeping ? .keepGreen : .removeRed).frame(width: 64, alignment: .leading)
             VStack(alignment: .leading, spacing: 1) {
-                Text(Display.short(copy.folder)).lineLimit(1).truncationMode(.middle)
+                Text(Display.copyLines(copy).name).lineLimit(1).truncationMode(.middle)
+                Text(Display.copyLines(copy).folder).font(.callout).foregroundStyle(.secondary).lineLimit(1).truncationMode(.middle)
                 Text("Modified \(Display.date.string(from: copy.modified)) · \(Display.count(model.result?.folderFileCount[copy.folder] ?? 0)) files in this folder")
                     .font(.caption).foregroundStyle(.secondary)
             }

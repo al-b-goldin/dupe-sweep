@@ -7,9 +7,13 @@ enum Stage { case start, scanning, results, done }
 
 enum SizeFloor: Int64, CaseIterable, Identifiable {
     case any = 1, kb10 = 10_240, kb100 = 102_400, mb1 = 1_048_576, mb10 = 10_485_760
+    case mb50 = 52_428_800, mb100 = 104_857_600, gb1 = 1_073_741_824
     var id: Int64 { rawValue }
     var title: String {
-        switch self { case .any: return "Any size"; case .kb10: return "10 KB"; case .kb100: return "100 KB"; case .mb1: return "1 MB"; case .mb10: return "10 MB" }
+        switch self {
+        case .any: return "Any size"; case .kb10: return "10 KB"; case .kb100: return "100 KB"; case .mb1: return "1 MB"; case .mb10: return "10 MB"
+        case .mb50: return "50 MB"; case .mb100: return "100 MB"; case .gb1: return "1 GB"
+        }
     }
 }
 

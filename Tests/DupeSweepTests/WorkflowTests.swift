@@ -209,4 +209,46 @@ final class WorkflowTests {
         await wait("the put-back message") { self.model.restored != nil }
         #expect(model.restored == 2 && model.restoreFailed == 1, "2 files go back and the screen counts the 1 that could not (restored \(model.restored ?? -1), failed \(model.restoreFailed))")
     }
+
+    /// John's report: the heading named only the first copy and each row showed only its folder, so two names looked like one.
+    @Test func everyCopyShowsItsOwnNameAndTheHeadingNamesBoth() async throws {
+        let png = random(30_000)
+        try put("Fractal/JMT_145.png", png); try put("Fractal/JMT_145a.png", png)
+        await scan()
+        let set = try #require(model.plans.first?.set)
+        #expect(Display.setTitle(set) == "JMT_145.png and JMT_145a.png", "the heading names both files")
+        #expect(Display.setDetail(set).contains("same contents") && Display.setDetail(set).contains("2 different names"))
+        #expect(set.copies.map(\.name) == ["JMT_145.png", "JMT_145a.png"], "each row shows its own file name")
+        let same = DuplicateSet(id: "x", size: 1, copies: [FileItem(id: 1, path: "/a/r.pdf", size: 1, modified: .now, created: .now),
+                                                              FileItem(id: 2, path: "/b/r.pdf", size: 1, modified: .now, created: .now)])
+        #expect(Display.setTitle(same) == "r.pdf" && !Display.setDetail(same).contains("different names"), "one name when the names match")
+    }
+
+    @Test func theFiftyMegabyteOptionSkipsSmallerFiles() async throws {
+        try makeLibrary()                                     // its copies are all under 1 MB
+        model.floor = .mb50                                   // Options > Ignore files smaller than > 50 MB
+        #expect(SizeFloor.mb50.rawValue == 50 * 1_048_576 && SizeFloor.allCases.map(\.title).contains("50 MB"))
+        await scan()
+        #expect(model.nothingChecked && model.plans.isEmpty, "no file reaches 50 MB, so nothing is read")
+    }
+
+    /// The rule behind John's report: before you move a file to the Trash, the screen must tell it apart from every other copy.
+    /// The library mixes every hard case: copies with different names in one folder, the same name in different folders,
+    /// and three copies with three names. If any two rows of a set look the same, or the heading leaves out a name, this fails.
+    @Test func noTwoCopiesLookTheSameOnTheResultsScreen() async throws {
+        let a = random(40_000), b = random(41_000), c = random(42_000)
+        try put("Fractal/JMT_145.png", a); try put("Fractal/JMT_145a.png", a)                 // one folder, two names
+        try put("Work/plan.pdf", b); try put("Backup/plan.pdf", b)                              // one name, two folders
+        try put("Music/song.mp3", c); try put("Music/song (1).mp3", c); try put("Old/track.mp3", c)  // three names
+        await scan()
+        #expect(model.plans.count == 3)
+        for p in model.plans {
+            let rows = p.set.copies.map { Display.copyLines($0) }
+            #expect(Set(rows.map { "\($0.name)|\($0.folder)" }).count == rows.count, "two rows of \(Display.setTitle(p.set)) look the same")
+            #expect(zip(rows, p.set.copies).allSatisfy { $0.name == $1.name }, "every row shows its own file name")
+            let title = Display.setTitle(p.set)
+            #expect(p.set.names.count > 2 || p.set.names.allSatisfy { title.contains($0) }, "the heading names every file: \(title)")
+            #expect(p.set.names.count <= 2 || title.contains("\(p.set.names.count - 1) other names"), "the heading counts the names it leaves out")
+        }
+    }
 }

@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/al-b-goldin/dupe-sweep/releases/download/v1.0/DupeSweep-1.0.dmg"><img src="https://img.shields.io/badge/Download_for_Mac-v1.0-2BA85C?style=for-the-badge&logo=apple&logoColor=white" alt="Download Dupe Sweep 1.0 for Mac" height="44"></a>
+  <a href="https://github.com/al-b-goldin/dupe-sweep/releases/download/v1.1/DupeSweep-1.1.dmg"><img src="https://img.shields.io/badge/Download_for_Mac-v1.1-2BA85C?style=for-the-badge&logo=apple&logoColor=white" alt="Download Dupe Sweep 1.1 for Mac" height="44"></a>
 </p>
 
 <p align="center">
@@ -107,7 +107,7 @@
 
 ## Install
 
-1. Download [`DupeSweep-1.0.dmg`](https://github.com/al-b-goldin/dupe-sweep/releases/download/v1.0/DupeSweep-1.0.dmg) (under 2 MB) or pick a version on the [Releases page](https://github.com/al-b-goldin/dupe-sweep/releases/latest).
+1. Download [`DupeSweep-1.1.dmg`](https://github.com/al-b-goldin/dupe-sweep/releases/download/v1.1/DupeSweep-1.1.dmg) (under 2 MB) or pick a version on the [Releases page](https://github.com/al-b-goldin/dupe-sweep/releases/latest).
 2. Drag **Dupe Sweep** onto Applications.
 3. Open it from Applications.
 

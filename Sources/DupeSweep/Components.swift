@@ -70,6 +70,22 @@ enum Display {
         let i = NSWorkspace.shared.icon(forFile: path); i.size = NSSize(width: 28, height: 28); return i
     }
     static func count(_ n: Int) -> String { n.formatted() }
+    /// What one copy row shows: the file name, then its folder. A folder holds each name once, so no two rows can look alike.
+    static func copyLines(_ f: FileItem) -> (name: String, folder: String) { (f.name, short(f.folder)) }
+    /// The heading of a set. One name if every copy has it, otherwise the names joined, so no copy hides behind another's name.
+    static func setTitle(_ s: DuplicateSet) -> String {
+        let n = s.names
+        switch n.count {
+        case 1: return n[0]
+        case 2: return "\(n[0]) and \(n[1])"
+        default: return "\(n[0]) and \(n.count - 1) other names"
+        }
+    }
+    /// The line under the heading. It says the copies match by contents, and says when their names differ.
+    static func setDetail(_ s: DuplicateSet) -> String {
+        let names = s.names.count > 1 ? " · \(s.names.count) different names" : ""
+        return "\(s.copies.count) copies · \(Format.bytes(s.size)) each · same contents\(names)"
+    }
 }
 
 /// The big colored button. Drawn by hand so it looks the same everywhere, including in screenshots.

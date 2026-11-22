@@ -25,6 +25,8 @@ public struct DuplicateSet: Identifiable, Hashable, Sendable {
     public let size: Int64
     public let copies: [FileItem]
     public init(id: String, size: Int64, copies: [FileItem]) { self.id = id; self.size = size; self.copies = copies }
+    /// The different file names in the set, in the order of the copies. Copies with the same contents can have different names.
+    public var names: [String] { var seen = Set<String>(); return copies.map(\.name).filter { seen.insert($0).inserted } }
 }
 
 public struct ScanOptions: Sendable {

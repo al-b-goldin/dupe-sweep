@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 1.1 (2026-11-22)
+- Fixed: the results screen showed only the first copy's file name. Copies with different names in one folder looked like one file (reported by a user, JMT_145.png and JMT_145a.png). Each row now shows its own file name above its folder, and the heading names every file in the set.
+- The line under each set now says "same contents" and, when the names differ, how many names there are.
+- New size options: ignore files smaller than 50 MB, 100 MB or 1 GB. A large-files-only scan reads far less.
+- New check: a test fails if two copies in a set look the same on the results screen, or if the heading leaves out a name.
 - The results screen now names what the scan left out: protected folders (for example `/System` or `~/Library`) and items it could not read. Before, the note was set but never shown.
 - A scan that read no file says "Nothing was checked" and why, in place of "No duplicates found".
 - "Put Everything Back" now counts the files it could not put back.

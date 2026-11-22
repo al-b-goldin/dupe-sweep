@@ -56,6 +56,32 @@ final class EngineTests {
         #expect(r.sets.count == 0)
     }
 
+    /// John's report (2026-11-19): JMT_145.png and JMT_145a.png in one folder. Same contents, different names: one set, both names.
+    @Test func testSameContentsWithDifferentNamesIsOneSetThatKeepsBothNames() async throws {
+        let png = random(1_500_000)
+        try write("Fractal/JMT_145.png", png); try write("Fractal/JMT_145a.png", png)
+        let r = try await scan()
+        #expect(names(r) == [["JMT_145.png", "JMT_145a.png"]])
+        #expect(r.sets[0].names == ["JMT_145.png", "JMT_145a.png"], "each copy keeps its own name")
+    }
+
+    /// The other half: two different files of the same size, with names like John's, are never a set.
+    @Test func testDifferentContentsWithSimilarNamesAndSameSizeIsNotASet() async throws {
+        var other = random(1_500_000); let png = other
+        other[750_000] ^= 0x01
+        try write("Fractal/JMT_145.png", png); try write("Fractal/JMT_145a.png", other)
+        let r = try await scan()
+        #expect(r.sets.isEmpty)
+    }
+
+    @Test func testOnlyFilesAboveTheSizeLimitAreCompared() async throws {
+        let big = random(3 * mib), small = random(mib)
+        try write("a/big.bin", big); try write("b/big copy.bin", big); try write("a/small.bin", small); try write("b/small copy.bin", small)
+        let r = try await scan { $0.minSize = Int64(2 * mib) }
+        #expect(names(r) == [["big copy.bin", "big.bin"]])
+        #expect(r.filesScanned == 2, "files under the limit are not read at all")
+    }
+
     @Test func testHardLinkIsOneFileNotTwo() async throws {
         let p = try write("a/file.bin", random(3 * mib))
         try FileManager.default.linkItem(atPath: p, toPath: tmp.appendingPathComponent("b-link.bin").path)
